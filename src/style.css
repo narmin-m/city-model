@@ -1,0 +1,28 @@
+/* Ensure body and html take full height */
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+  }
+  
+  #root {
+    height: 100%;
+    width: 100%;
+  }
+  
+  canvas {
+    display: block;  /* Removes any spacing around the canvas */
+    height: 100vh;    /* Full screen */
+    width: 100vw;     /* Full screen */
+  }
+  
+  .loading {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 24px;
+    color: white;
+  }
+  
