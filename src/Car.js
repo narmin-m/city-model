@@ -171,27 +171,24 @@ export function Car({ partitionPosition = { x: 0, y: 0, z: 0 } }) {
 
   const arrowRef = useRef();
   const cameraTarget = useRef(new Vector3());
-  const initialPosition = partitionPosition.z;
-  const speed = 0.1;
+  const initialPosition = partitionPosition.z - 1; // Start a bit behind
+  const speed = 0.3; // Adjusted speed for faster movement
   const pathLength = 20;
-  
-  const resetTime = 45;  // Time after which the arrow will reset position, in seconds
+  const resetTime = 25; // Reset after 35 seconds
 
   useEffect(() => {
     if (gltf && gltf.scene) {
       gltf.scene.scale.set(0.03, 0.03, 0.03);
       gltf.scene.position.set(partitionPosition.x + 0.06, partitionPosition.y + 0.1, initialPosition);
-  
-      // Rotate the arrow object to be flat on the ground
-      gltf.scene.rotation.x = -Math.PI / 2; // Rotate 90 degrees around the X-axis
-      gltf.scene.rotation.y = -Math.PI / 2; // Rotate 90 degrees around the Y-axis
-      gltf.scene.rotation.z = 0; // No rotation around the Z-axis
-  
+
+      gltf.scene.rotation.x = -Math.PI / 2;
+      gltf.scene.rotation.y = -Math.PI / 2;
+      gltf.scene.rotation.z = 0;
+
       gltf.scene.traverse((object) => {
         if (object instanceof Mesh) {
           object.castShadow = true;
           object.receiveShadow = true;
-          // object.material.color = new Color("#358737");
           object.material.envMapIntensity = 1.5;
         }
       });
@@ -201,31 +198,25 @@ export function Car({ partitionPosition = { x: 0, y: 0, z: 0 } }) {
   useFrame((state, delta) => {
     const elapsedTime = state.clock.getElapsedTime();
 
-    // Move arrow forward along z-axis
-    arrowRef.current.position.z = initialPosition + (elapsedTime * speed) % pathLength;
+    // Calculate the current z-position based on elapsed time and speed
+    const currentZ = initialPosition + (elapsedTime * speed) % pathLength;
+    arrowRef.current.position.set(partitionPosition.x + 0.06, partitionPosition.y + 0.1, currentZ);
 
-    // Reset the position after 45 seconds, and allow the movement to continue
+    // Reset clock every 35 seconds for a smooth loop
     if (elapsedTime > resetTime) {
-      // Reset to initial position after resetTime seconds
-      arrowRef.current.position.set(partitionPosition.x + 0.06, partitionPosition.y + 0.1, initialPosition);
-
-      // Reset clock to continue from there and maintain smooth movement
-      state.clock.start();  // Start the clock again to continue moving the arrow forward
+      state.clock.start();
     }
 
-    // Update the camera target to follow the arrow, positioned just behind and close to the ground
+    // Position the camera slightly above and behind the arrow for a smooth following effect
     cameraTarget.current.copy(arrowRef.current.position);
+    cameraTarget.current.y = arrowRef.current.position.y + 0.5; // Slightly above the arrow
+    cameraTarget.current.z = arrowRef.current.position.z - 1; // Behind the arrow
 
-    // Position camera slightly behind the arrow and close to street level
-    cameraTarget.current.y = arrowRef.current.position.y + 0.2; // Just above ground level
-    cameraTarget.current.z = arrowRef.current.position.z - 0.7;  // Closer to the arrow, behind it
-
-    // Smooth camera movement to follow the arrow at street level
+    // Smoothly follow the arrow
     const cameraPosition = state.camera.position;
     cameraPosition.lerp(cameraTarget.current, 0.1); // Smoothly move towards target position
-    state.camera.lookAt(arrowRef.current.position);  // Always look at the arrow to stay in frame
+    state.camera.lookAt(arrowRef.current.position); // Keep looking at the arrow
   });
 
   return <primitive ref={arrowRef} object={gltf.scene} />;
 }
-
