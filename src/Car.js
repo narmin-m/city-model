@@ -211,21 +211,18 @@ export function Car({ partitionPosition = { x: 0, y: 0, z: 0 } }) {
       state.clock.start();
     }
   
-    // Position the camera slightly above and closer to the arrow for a smooth following effect
+    // Set the camera slightly above the arrow by adjusting the y-axis
     cameraTarget.current.copy(arrowRef.current.position);
-  
-    // Adjust the camera's position to be slightly above and closer to the arrow
-    cameraTarget.current.y = arrowRef.current.position.y + 0.3; // Slightly above the arrow
-    cameraTarget.current.z = arrowRef.current.position.z - 0.3; // Closer to the arrow (decrease the negative value to bring it closer)
-  
+    cameraTarget.current.y += 0.2;  // Adjust for a slightly elevated view
+    cameraTarget.current.z -= 0.5;  // Maintain distance behind the arrow
+
     // Smoothly move the camera towards the target position
     const cameraPosition = state.camera.position;
-    cameraPosition.lerp(cameraTarget.current, 0.1); // Smoothly move towards target position
-    
+    cameraPosition.lerp(cameraTarget.current, 0.1);
+
     // Make sure the camera always looks at the arrow
-    state.camera.lookAt(arrowRef.current.position); // Keep looking at the arrow
+    state.camera.lookAt(arrowRef.current.position);
   });
 
   return <primitive ref={arrowRef} object={gltf.scene} />;
 }
-
