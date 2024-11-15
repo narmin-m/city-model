@@ -49,20 +49,19 @@
 // }
 
 // export default App;
-import React, { Suspense, useState } from 'react';
 import './style.css';
 import { Canvas } from "@react-three/fiber";
-import { PerspectiveCamera, SpotLight } from "@react-three/drei";
+import { Suspense, useState } from 'react';
 import Ground from "./Ground";
 import { Car } from "./Car";
 import { City } from "./City";
+import { PerspectiveCamera, SpotLight } from "@react-three/drei";
 
 function CarShow() {
   const [partitionPosition, setPartitionPosition] = useState({ x: 0, y: 0, z: 0 });
 
   return (
     <>
-      {/* Adjusted camera y-position for a higher view */}
       <PerspectiveCamera makeDefault fov={50} position={[3, 5, 5]} />
       <color args={["#0b0c10"]} attach="background" />
 
@@ -71,7 +70,7 @@ function CarShow() {
       <ambientLight intensity={0.4} />
 
       <Ground />
-
+      
       <Suspense fallback={null}>
         <City setPartitionPosition={setPartitionPosition} />
       </Suspense>

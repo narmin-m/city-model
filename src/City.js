@@ -14,7 +14,6 @@
 //   return <primitive object={scene} scale={1} position={[0, 0, 0]} />;
 // }
 
-
 import React, { useEffect, useState } from 'react';
 import { useGLTF } from '@react-three/drei';
 import { Color } from 'three';
@@ -50,4 +49,3 @@ export function City({ setPartitionPosition }) {
 
   return <primitive object={scene} scale={1} position={[0, 0, 0]} />;
 }
-

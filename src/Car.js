@@ -155,7 +155,6 @@
 
 //   return <primitive ref={arrowRef} object={gltf.scene} />;
 // }
-
 import React, { useRef, useEffect } from "react";
 import { useLoader, useFrame } from "@react-three/fiber";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";

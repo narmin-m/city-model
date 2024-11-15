@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
-import { useFrame, useLoader } from "@react-three/fiber";
+import { useLoader, useFrame } from "@react-three/fiber";
 import { MeshReflectorMaterial } from "@react-three/drei";
-import { TextureLoader, RepeatWrapping, LinearEncoding } from "three";
+import { TextureLoader, RepeatWrapping, LinearEncoding, RGBAFormat, UnsignedByteType } from "three";
 
 export default function Ground() {
   // Load the textures for roughness and normal maps
@@ -17,9 +17,12 @@ export default function Ground() {
       t.wrapT = RepeatWrapping;
       t.repeat.set(5, 5);  // Adjust repeat to fit the size of the ground
       t.offset.set(0, 0);
-    });
 
-    normal.encoding = LinearEncoding;  // Set encoding for normal map
+      // Force the textures to use RGBAFormat and UnsignedByteType
+      t.format = RGBAFormat;
+      t.type = UnsignedByteType;
+      t.encoding = LinearEncoding;  // Set the encoding to Linear
+    });
   }, [normal, roughness]);
 
   // Animate the texture offsets
