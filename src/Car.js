@@ -171,8 +171,10 @@ export function Car({ partitionPosition = { x: 0, y: 0, z: 0 } }) {
 
   const arrowRef = useRef();
   const cameraTarget = useRef(new Vector3());
+  const lastPosition = useRef(new Vector3());
+  const lastCameraPosition = useRef(new Vector3());
 
-  const initialPosition = partitionPosition.z - 3; // Adjusted initial position closer to camera
+  const initialPosition = partitionPosition.z - 3;
   const speed = 0.28;
   const pathLength = 20;
   const resetTime = 38;
@@ -180,10 +182,7 @@ export function Car({ partitionPosition = { x: 0, y: 0, z: 0 } }) {
   useEffect(() => {
     if (gltf && gltf.scene) {
       gltf.scene.scale.set(0.03, 0.03, 0.03);
-
-      // Position the arrow a bit closer to the camera on the z-axis
-      gltf.scene.position.set(partitionPosition.x + 0.06, partitionPosition.y + 0.1, initialPosition - 2.5); // Minor adjustment
-
+      gltf.scene.position.set(partitionPosition.x + 0.06, partitionPosition.y + 0.1, initialPosition - 2.5);
       gltf.scene.rotation.x = -Math.PI / 2;
       gltf.scene.rotation.y = -Math.PI / 2;
       gltf.scene.rotation.z = 0;
@@ -196,29 +195,49 @@ export function Car({ partitionPosition = { x: 0, y: 0, z: 0 } }) {
           object.material.color = new Color("#00fe88");
         }
       });
+
+      // Initialize last position
+      lastPosition.current.set(
+        partitionPosition.x + 0.06,
+        partitionPosition.y + 0.1,
+        initialPosition - 2.5
+      );
     }
   }, [gltf, partitionPosition, initialPosition]);
 
   useFrame((state, delta) => {
+    if (!arrowRef.current) return;
+
     const elapsedTime = state.clock.getElapsedTime();
 
-    // Adjust the arrow's movement to stay slightly closer to the camera
+    // Calculate new position
     const currentZ = initialPosition + (elapsedTime * speed) % pathLength;
-    arrowRef.current.position.set(partitionPosition.x + 0.06, partitionPosition.y + 0.1, currentZ - 2.5); // Minor adjustment for a consistent back position
+    const newPosition = new Vector3(
+      partitionPosition.x + 0.06,
+      partitionPosition.y + 0.1,
+      currentZ - 2.5
+    );
+
+    // Smooth position transition
+    lastPosition.current.lerp(newPosition, 0.1);
+    arrowRef.current.position.copy(lastPosition.current);
 
     if (elapsedTime > resetTime) {
       state.clock.start();
     }
 
-    // Adjust camera to keep it following slightly above and behind the arrow
-    cameraTarget.current.copy(arrowRef.current.position);
-    cameraTarget.current.y += 0.3; // Slightly elevated view
+    // Update camera target with smoothing
+    cameraTarget.current.copy(lastPosition.current);
+    cameraTarget.current.y += 0.3;
     cameraTarget.current.z -= 0.5;
 
-    const cameraPosition = state.camera.position;
-    cameraPosition.lerp(cameraTarget.current, 0.1);
-
-    state.camera.lookAt(arrowRef.current.position);
+    // Smooth camera position transition
+    if (!lastCameraPosition.current.equals(state.camera.position)) {
+      lastCameraPosition.current.copy(state.camera.position);
+    }
+    lastCameraPosition.current.lerp(cameraTarget.current, 0.1);
+    state.camera.position.copy(lastCameraPosition.current);
+    state.camera.lookAt(lastPosition.current);
   });
 
   return <primitive ref={arrowRef} object={gltf.scene} />;
