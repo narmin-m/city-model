@@ -172,22 +172,22 @@ export function Car({ partitionPosition = { x: 0, y: 0, z: 0 } }) {
   const arrowRef = useRef();
   const cameraTarget = useRef(new Vector3());
 
-  const initialPosition = partitionPosition.z - 5; // Start the car closer to the street's start
-  const speed = 0.3; // Adjusted speed for faster movement
+  const initialPosition = partitionPosition.z - 3; // Adjusted initial position closer to camera
+  const speed = 0.28;
   const pathLength = 20;
-  const resetTime = 38; // Reset after 25 seconds for smooth loop
+  const resetTime = 38;
 
   useEffect(() => {
     if (gltf && gltf.scene) {
       gltf.scene.scale.set(0.03, 0.03, 0.03);
-  
-      // Set the car position to start further back along the z-axis
-      gltf.scene.position.set(partitionPosition.x + 0.06, partitionPosition.y + 0.1, initialPosition - 2); // Further back by 2 units from the new starting point
-  
+
+      // Position the arrow a bit closer to the camera on the z-axis
+      gltf.scene.position.set(partitionPosition.x + 0.06, partitionPosition.y + 0.1, initialPosition - 2.5); // Minor adjustment
+
       gltf.scene.rotation.x = -Math.PI / 2;
       gltf.scene.rotation.y = -Math.PI / 2;
       gltf.scene.rotation.z = 0;
-  
+
       gltf.scene.traverse((object) => {
         if (object instanceof Mesh) {
           object.castShadow = true;
@@ -201,26 +201,23 @@ export function Car({ partitionPosition = { x: 0, y: 0, z: 0 } }) {
 
   useFrame((state, delta) => {
     const elapsedTime = state.clock.getElapsedTime();
-  
-    // Calculate the current z-position based on elapsed time and speed
+
+    // Adjust the arrow's movement to stay slightly closer to the camera
     const currentZ = initialPosition + (elapsedTime * speed) % pathLength;
-    arrowRef.current.position.set(partitionPosition.x + 0.06, partitionPosition.y + 0.1, currentZ);
-  
-    // Reset clock every 25 seconds for a smooth loop
+    arrowRef.current.position.set(partitionPosition.x + 0.06, partitionPosition.y + 0.1, currentZ - 2.5); // Minor adjustment for a consistent back position
+
     if (elapsedTime > resetTime) {
       state.clock.start();
     }
-  
-    // Set the camera slightly above the arrow by adjusting the y-axis
-    cameraTarget.current.copy(arrowRef.current.position);
-    cameraTarget.current.y += 0.2;  // Adjust for a slightly elevated view
-    cameraTarget.current.z -= 0.5;  // Maintain distance behind the arrow
 
-    // Smoothly move the camera towards the target position
+    // Adjust camera to keep it following slightly above and behind the arrow
+    cameraTarget.current.copy(arrowRef.current.position);
+    cameraTarget.current.y += 0.3; // Slightly elevated view
+    cameraTarget.current.z -= 0.5;
+
     const cameraPosition = state.camera.position;
     cameraPosition.lerp(cameraTarget.current, 0.1);
 
-    // Make sure the camera always looks at the arrow
     state.camera.lookAt(arrowRef.current.position);
   });
 
